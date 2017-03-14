@@ -17,3 +17,5 @@ Full Stack Nanodegree-Udacity
   - fresh_tomatoes.html
   - README.md
   - Screen Shot
+
+* Add MarkdownSyntaxPractice.md (Mar 14, 2017)
