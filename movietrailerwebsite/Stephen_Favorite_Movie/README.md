@@ -1,9 +1,9 @@
 # Movie Trailer Website Project  03/13/2017
 ============================================
 
-* python
+* python - `python entertainment_center.py` to create the trailer website
 
-* html - fresh_tomatoes.html is the file to see the result in the web browser
+* html - fresh_tomatoes.html is the file to open the result in the web browser
 
 * Python - media.py
   - Clarify Movie() class
