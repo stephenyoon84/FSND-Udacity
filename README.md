@@ -19,3 +19,6 @@ Full Stack Nanodegree-Udacity
   - Screen Shot
 
 * Add MarkdownSyntaxPractice.md (Mar 14, 2017)
+
+* Add PFinPython folder (Mar 14, 2017)
+  - This folder will contain the practice for Programming Fundamental in Python
