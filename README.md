@@ -22,3 +22,6 @@ Full Stack Nanodegree-Udacity
 
 * Add PFinPython folder (Mar 14, 2017)
   - This folder will contain the practice for Programming Fundamental in Python
+
+* Add Build-a-Portfolio/ (Mar 15, 2017)
+  - This folder related with second project : Build a Portfolio with HTML and CSS
