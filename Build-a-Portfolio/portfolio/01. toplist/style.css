@@ -1,0 +1,41 @@
+/**{
+  outline: 1px solid red !important;
+}*/
+
+*{
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+h1{
+  background-color: #33BEBE;
+  color: white;
+  font-family: Helvetica;
+  font-size: 36px;
+}
+
+.title{
+  margin: 10px;
+  padding-top: 25px;
+  padding-left: 10px;
+}
+
+.description{
+  color: #7C8B88;
+  font-style: oblique;
+  font-weight: bold;
+  max-width: 705px;
+  margin: 10px;
+}
+
+.screenshot{
+  max-width: 460px;
+  margin: 10px;
+}
+
+.app{
+  display: -webkit-flex;
+  display: flex;
+}
