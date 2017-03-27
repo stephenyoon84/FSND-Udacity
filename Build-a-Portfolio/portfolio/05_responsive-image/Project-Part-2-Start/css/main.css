@@ -1,0 +1,30 @@
+body {
+  font-family: sans-serif;
+  margin: 2em;
+}
+
+article {
+  margin: 0 auto;
+  max-width: 50em;
+  border-bottom: 1px solid #ddd;
+}
+
+body {
+  font-family: sans-serif;
+  margin: 2em;
+}
+
+h1 {
+  margin: 0 auto 1em auto;
+  width: 800px;
+}
+
+img {
+  max-width: 100%;
+}
+
+footer {
+  margin: 0 auto;
+  width: 800px;
+  text-align: center;
+}
