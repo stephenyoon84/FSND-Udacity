@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="/css/main.css">
+    <meta charset="utf-8">
+    <title>New Post</title>
+
+  </head>
+
+  <body>
+    <h1>Stephen's Blog</h1>
+    <form method="post">
+      <h2>New Post</h2>
+      <label>
+        <div>Subject</div>
+        <input type="text" name="subject" value="{{subject}}">
+      </label>
+
+      <label>
+        <div>Blog</div>
+        <textarea name="content">{{content}}</textarea>
+      </label>
+
+      <div class="error">
+        {{error}}
+      </div>
+
+      <input type="submit">
+    </form>
+
+  </body>
+</html>
