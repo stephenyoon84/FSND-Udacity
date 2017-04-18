@@ -77,9 +77,31 @@ class NewPost(BlogHandler):
             error = "subject and content, please!"
             self.render("newpost.html", subject=subject, content=content, error=error)
 
+class Rot13Page(BlogHandler):
+    def get(self):
+        self.render("rot13_input.html")
+    def post(self):
+        items = self.request.get("text")
+        result = ''
+        for i in items:
+            if i in rot13_set:
+                result += rot13_set[rot13_set.index(i) + 13]
+            else:
+                result += i
+        self.render("rot13_input.html", rot13_result = result)
+
+
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog/?', BlogFront),
                                ('/blog/([0-9]+)', PostPage),
                                ('/blog/newpost', NewPost),
+                               ('/rot13', Rot13Page),
                                ],
                                debug=True)
+
+rot13_set = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P',
+            'Q','R','S','T','U','V','W','X','Y','Z','A','B','C','D','E','F','G',
+            'H','I','J','K','L','M',
+            'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p',
+            'q','r','s','t','u','v','w','x','y','z','a','b','c','d','e','f','g',
+            'h','i','j','k','l','m']
