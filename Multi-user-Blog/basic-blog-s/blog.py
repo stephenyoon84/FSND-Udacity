@@ -29,7 +29,7 @@ class BlogHandler(webapp2.RequestHandler):
 
 class MainPage(BlogHandler):
     def get(self):
-        self.write('Hello, here is Stephen\'s blog')
+        self.render("mainpage.html")
 
 def blog_key(name = 'default'):
     return db.Key.from_path('blogs', name)
