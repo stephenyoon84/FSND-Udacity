@@ -6,12 +6,14 @@ from back_etc import *
 from google.appengine.ext import db
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
-jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
-                               autoescape = True)
+jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),
+                               autoescape=True)
+
 
 def render_str(template, **params):
     t = jinja_env.get_template(template)
     return t.render(params)
+
 
 class BlogHandler(webapp2.RequestHandler):
     def write(self, *a, **kw):
@@ -54,7 +56,7 @@ class MainPage(BlogHandler):
         self.render("mainpage.html")
 
 
-def users_key(group = 'default'):
+def users_key(group='default'):
     return db.Key.from_path('users', group)
 
 
@@ -87,22 +89,21 @@ class User(db.Model):
             return u
 
 
-def blog_key(name = 'default'):
+def blog_key(name='default'):
     return db.Key.from_path('posts', name)
-
 
 
 class Post(db.Model):
     # post database - contain subject content and
     # created datetime last modified datetime
-    subject = db.StringProperty(required = True)
-    content = db.TextProperty(required = True)
-    created = db.DateTimeProperty(auto_now_add = True)
-    last_modified = db.DateTimeProperty(auto_now = True)
+    subject = db.StringProperty(required=True)
+    content = db.TextProperty(required=True)
+    created = db.DateTimeProperty(auto_now_add=True)
+    last_modified = db.DateTimeProperty(auto_now=True)
 
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
-        return render_str("post.html", p = self)
+        return render_str("post.html", p=self)
 
 
 class BlogFront(BlogHandler):
@@ -110,7 +111,7 @@ class BlogFront(BlogHandler):
         # posts = Post.all().order('-created')
         posts = db.GqlQuery("select * from Post\
         order by created desc limit 10")  # - using GqlQuery example
-        self.render('front.html', posts = posts)
+        self.render('front.html', posts=posts)
 
 
 class PostPage(BlogHandler):
@@ -122,7 +123,7 @@ class PostPage(BlogHandler):
             self.error(404)
             return
 
-        self.render("permalink.html", post = post)
+        self.render("permalink.html", post=post)
 
 
 class NewPost(BlogHandler):
@@ -134,12 +135,13 @@ class NewPost(BlogHandler):
         content = self.request.get("content")
 
         if subject and content:
-            p = Post(parent = blog_key(), subject = subject, content = content)
+            p = Post(parent=blog_key(), subject=subject, content=content)
             p.put()
             self.redirect("/blog/%s" % str(p.key().id()))
         else:
             error = "subject and content, please!"
-            self.render("newpost.html", subject=subject, content=content, error=error)
+            self.render("newpost.html", subject=subject,
+                        content=content, error=error)
 
 
 class SignUpPage(BlogHandler):
@@ -167,11 +169,11 @@ class SignUpPage(BlogHandler):
                 error_verify = "Your passwords didn't match."
             if not v_email:
                 error_email = "That's not a valid email."
-            self.render("sign_up.html", username = username, email = email,
-                        error_username = error_username,
-                        error_password = error_password,
-                        error_verify = error_verify,
-                        error_email = error_email)
+            self.render("sign_up.html", username=username, email=email,
+                        error_username=error_username,
+                        error_password=error_password,
+                        error_verify=error_verify,
+                        error_email=error_email)
         else:
             u = User.by_name(username)
             if u:
@@ -219,6 +221,7 @@ class Logout(BlogHandler):
 class Rot13Page(BlogHandler):
     def get(self):
         self.render("rot13_input.html")
+
     def post(self):
         items = self.request.get("text")
         result = ''
@@ -227,7 +230,7 @@ class Rot13Page(BlogHandler):
                 result += rot13_set[rot13_set.index(i) + 13]
             else:
                 result += i
-        self.render("rot13_input.html", rot13_result = result)
+        self.render("rot13_input.html", rot13_result=result)
 
 
 app = webapp2.WSGIApplication([('/', MainPage),
@@ -239,5 +242,4 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/logout', Logout),
                                ('/welcome', WelcomeHandler),
                                ('/rot13', Rot13Page),
-                               ],
-                               debug=True)
+                               ], debug=True)
