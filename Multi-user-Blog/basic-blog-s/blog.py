@@ -31,7 +31,7 @@ class MainPage(BlogHandler):
         self.render("mainpage.html")
 
 def blog_key(name = 'default'):
-    return db.Key.from_path('blogs', name)
+    return db.Key.from_path('', name)
 
 class Post(db.Model):
     # post database - contain subject content and
@@ -117,7 +117,6 @@ class WelcomeHandler(BlogHandler):
     def get(self):
         username = self.request.get('username')
         self.render("welcome.html", username=username)
-
 
 class Rot13Page(BlogHandler):
     def get(self):
