@@ -106,12 +106,12 @@ class Post(db.Model):
         return render_str("post.html", p=self)
 
 
-class BlogFront(BlogHandler):
+class BlogPosts(BlogHandler):
     def get(self):
         # posts = Post.all().order('-created')
         posts = db.GqlQuery("select * from Post\
-        order by created desc limit 10")  # - using GqlQuery example
-        self.render('front.html', posts=posts)
+        order by created desc")  # - using GqlQuery example
+        self.render('blogpost.html', posts=posts)
 
 
 class PostPage(BlogHandler):
@@ -215,7 +215,7 @@ class Login(BlogHandler):
 class Logout(BlogHandler):
     def get(self):
         self.logout()
-        self.redirect('/signup')
+        self.redirect('/login')
 
 
 class Rot13Page(BlogHandler):
@@ -234,7 +234,7 @@ class Rot13Page(BlogHandler):
 
 
 app = webapp2.WSGIApplication([('/', MainPage),
-                               ('/blog/?', BlogFront),
+                               ('/blog/?', BlogPosts),
                                ('/blog/([0-9]+)', PostPage),
                                ('/blog/newpost', NewPost),
                                ('/signup', SignUpPage),
