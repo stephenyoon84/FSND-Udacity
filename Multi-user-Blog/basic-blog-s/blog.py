@@ -53,7 +53,9 @@ class BlogHandler(webapp2.RequestHandler):
 class MainPage(BlogHandler):
     # render mainpage.html
     def get(self):
-        self.render("mainpage.html")
+        posts = db.GqlQuery("select * from Post\
+        order by created desc limit 10")
+        self.render("mainfront.html", posts=posts)
 
 
 def users_key(group='default'):
@@ -98,12 +100,36 @@ class Post(db.Model):
     # created datetime last modified datetime
     subject = db.StringProperty(required=True)
     content = db.TextProperty(required=True)
+    name = db.StringProperty()
+    score = db.IntegerProperty(default=0)
+    liker = db.StringListProperty()
     created = db.DateTimeProperty(auto_now_add=True)
     last_modified = db.DateTimeProperty(auto_now=True)
 
     def render(self):
-        self._render_text = self.content.replace('\n', '<br>')
+        self._render_text = self.content
         return render_str("post.html", p=self)
+
+
+class Comment_db(db.Model):
+    content = db.StringProperty(required=True)
+    name = db.StringProperty(required=True)
+    relate_post = db.StringProperty(required=True)
+    created = db.DateTimeProperty(auto_now_add=True)
+
+
+def comment_key(name='default'):
+    return db.Key.from_path('commentdb', name)
+
+
+# class Like_db(db.Model):
+#     likes = db.BooleanProperty()
+#     relate_post = db.StringProperty(required=True)
+#     liker = db.StringProperty(required=True)
+#
+#
+# def like_key(name='default'):
+#     return db.Key.from_path('likes', name)
 
 
 class BlogPosts(BlogHandler):
@@ -114,16 +140,61 @@ class BlogPosts(BlogHandler):
         self.render('blogpost.html', posts=posts)
 
 
+def permalink(self, post_id, **kw):
+    # likes_key = db.Key.from_path('Like_db', int(post_id),
+    #                     parent=like_key())
+    # like = db.get(likes_key)
+    like_unlike = "Like"
+    user = self.user
+    post_key = db.Key.from_path('Post', int(post_id),
+                                parent=blog_key())
+    post = db.get(post_key)
+    if not user:
+        like_unlike = "Like"
+    elif user.name in post.liker:
+        like_unlike = "Unlike"
+    else:
+        liker_unlike = "Like"
+    com_key = db.Key.from_path('Comment_db', int(post_id),
+                        parent=comment_key())
+    comment = db.get(com_key)
+    comments = db.GqlQuery("select * from Comment_db\
+    where relate_post='%s' order by created" % str(post.key().id()))
+    return self.render("permalink.html", post=post, like_unlike=like_unlike,
+                    comments=comments, **kw)
+
+
 class PostPage(BlogHandler):
     def get(self, post_id):
         key = db.Key.from_path('Post', int(post_id), parent=blog_key())
         post = db.get(key)
+        # comments = db.GqlQuery("select * from Comment_db\
+        # where relate_post='%s' order by created" % str(post.key().id()))
 
         if not post:
             self.error(404)
             return
+        permalink(self, post_id)
 
-        self.render("permalink.html", post=post)
+    def post(self, post_id):
+        comment = self.request.get("comment")
+        comments_key = db.Key.from_path('Comment_db', int(post_id),
+                                    parent=comment_key())
+        comments = db.get(comments_key)
+        post_key = db.Key.from_path('Post', int(post_id), parent=blog_key())
+        post = db.get(post_key)
+
+        if not self.user:
+            error = "Please log in/sign up first."
+            permalink(self, post_id, error_comment=error)
+        elif comment:
+            comments = Comment_db(parent=comment_key(), content=comment,
+                                relate_post=str(post.key().id()),
+                                name=self.user.name)
+            comments.put()
+            self.redirect("/blog/%s" % str(post.key().id()))
+        else:
+            self.redirect("/blog/%s" % str(post.key().id()))
 
 
 class NewPost(BlogHandler):
@@ -134,14 +205,150 @@ class NewPost(BlogHandler):
         subject = self.request.get("subject")
         content = self.request.get("content")
 
-        if subject and content:
-            p = Post(parent=blog_key(), subject=subject, content=content)
+        if not self.user:
+            error = "Please log in/sign up first."
+            self.render("newpost.html", subject=subject,
+                        content=content, error=error)
+        elif subject and content:
+            p = Post(parent=blog_key(), subject=subject,
+                    content=content, name=self.user.name)
             p.put()
             self.redirect("/blog/%s" % str(p.key().id()))
         else:
             error = "subject and content, please!"
             self.render("newpost.html", subject=subject,
                         content=content, error=error)
+
+
+class DeletePost(BlogHandler):
+    def post(self, post_id):
+        key = db.Key.from_path('Post', int(post_id), parent=blog_key())
+        post = db.get(key)
+        comments = db.GqlQuery("select * from Comment_db\
+        where relate_post='%s' order by created" % str(post.key().id()))
+
+        if not self.user:
+            error = "Please log in/sign up first."
+            permalink(self, post_id, error=error)
+        elif self.user.name == post.name:
+            post.delete()
+            self.redirect('/')
+        else:
+            error = "You cannot delete this post."
+            permalink(self, post_id, error=error)
+
+
+class EditPost(BlogHandler):
+    def get(self, post_id):
+        key = db.Key.from_path('Post', int(post_id), parent=blog_key())
+        post = db.get(key)
+        comments = db.GqlQuery("select * from Comment_db\
+        where relate_post='%s' order by created" % str(post.key().id()))
+
+
+        if not self.user:
+            error = "Please log in/sign up first."
+            permalink(self, post_id, error=error)
+        elif self.user.name == post.name:
+            self.render('editpost.html', subject=post.subject,
+                        content=post.content)
+        else:
+            error = "You cannot edit this post."
+            permalink(self, post_id, error=error)
+
+    def post(self, post_id):
+        subject = self.request.get("subject")
+        content = self.request.get("content")
+        key = db.Key.from_path('Post', int(post_id), parent=blog_key())
+        post = db.get(key)
+
+        if subject and content:
+            post.subject = subject
+            post.content = content
+            post.put()
+            self.redirect("/blog/%s" % str(post.key().id()))
+        else:
+            subject = post.subject
+            content = post.content
+            error = "subject and content, please!"
+            self.render("editpost.html", subject=subject,
+                        content=content, error=error)
+
+
+class DeleteComment(BlogHandler):
+    def get(self):
+        comments_id = self.request.get("com_id")
+        com_key = db.Key.from_path('Comment_db', int(comments_id),
+                            parent=comment_key())
+        comment = db.get(com_key)
+        user = self.user
+        post_key = db.Key.from_path('Post', int(comment.relate_post),
+                                    parent=blog_key())
+        post = db.get(post_key)
+        post_id = post.key().id()
+        comments = db.GqlQuery("select * from Comment_db\
+        where relate_post='%s' order by created" % str(post.key().id()))
+
+        if comment.content:
+            if not user:
+                error = "Please log in/sign up first."
+                permalink(self, post_id, error_comment=error)
+            elif comment.name == user.name:
+                comment.delete()
+                self.redirect("/blog/%s" % str(comment.relate_post))
+            else:
+                error = "You cannot delete this comment."
+                permalink(self, post_id, error_comment=error)
+        else:
+            error = "This comment no longer exists."
+            permalink(self, post_id, error_comment=error)
+
+
+class LikePost(BlogHandler):
+    def get(self):
+        post_id = self.request.get("post_id")
+        # likes_key = db.Key.from_path('Like_db', int(post_id),
+        #                     parent=like_key())
+        # like = db.get(likes_key)
+        user = self.user
+        post_key = db.Key.from_path('Post', int(post_id),
+                                    parent=blog_key())
+        post = db.get(post_key)
+        com_key = db.Key.from_path('Comment_db', int(post_id),
+                            parent=comment_key())
+        comment = db.get(com_key)
+        comments = db.GqlQuery("select * from Comment_db\
+        where relate_post='%s' order by created" % str(post.key().id()))
+
+        if not user:
+            error = "Please log in/sign up first."
+            permalink(self, post_id, error=error)
+        elif post.name == user.name:
+            error = "You cannot like your own post."
+            permalink(self, post_id, error=error)
+        else:
+            if user.name in post.liker:
+                msg = "You unlike this post."
+                post.score = post.score - 1
+                post.liker.remove('%s' % user.name)
+                post.put()
+                permalink(self, post_id, error=msg)
+            else:
+                msg = "You like this post."
+                post.score = post.score + 1
+                post.liker.append('%s' % user.name)
+                post.put()
+                permalink(self, post_id, error=msg)
+            # like = Like_db(parent=like_key(), likes=True,
+            #             relate_post=str(post.key().id()),
+            #             liker=user.name)
+            # like.put()
+            # post.score = post.score - 1
+            # post.put()
+            # permalink(self, post_id)
+
+
+
 
 
 class SignUpPage(BlogHandler):
@@ -236,7 +443,11 @@ class Rot13Page(BlogHandler):
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog/?', BlogPosts),
                                ('/blog/([0-9]+)', PostPage),
+                               ('/blog/delete/([0-9]+)', DeletePost),
+                               ('/blog/editpost/([0-9]+)', EditPost),
                                ('/blog/newpost', NewPost),
+                               ('/deletecomment', DeleteComment),
+                               ('/likescore', LikePost),
                                ('/signup', SignUpPage),
                                ('/login', Login),
                                ('/logout', Logout),

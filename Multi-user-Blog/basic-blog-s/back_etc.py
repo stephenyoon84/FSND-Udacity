@@ -30,6 +30,7 @@ def valid_email(email):
     else:
         return EMAIL_RE.match(email)
 
+
 def verify_password(password, verify):
     # validate password matching with verify. return boolean
     return password == verify
@@ -69,9 +70,11 @@ def valid_pw(name, pw, pw_hash):
     return pw_hash == make_pw_hash(name, pw, salt)
 
 
-rot13_set = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P',
-            'Q','R','S','T','U','V','W','X','Y','Z','A','B','C','D','E','F','G',
-            'H','I','J','K','L','M',
-            'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p',
-            'q','r','s','t','u','v','w','x','y','z','a','b','c','d','e','f','g',
-            'h','i','j','k','l','m']
+# ROT13 set
+rot13_set = [
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+    'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm']
