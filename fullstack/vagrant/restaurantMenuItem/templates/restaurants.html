@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <style>
+      .restaurant_link {
+        text-decoration:none;
+        font-size:2em;
+        color: #777;
+      }
+      .editdeletepane {
+        margin-top: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="pane">
+      <div class="header">
+        <h1>Restaurants</h1>
+      </div>
+      <a href="{{url_for('newRestaurants')}}">Create New Restaurant</a>
+      <div class="flash">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul>
+              {% for message in messages %}
+              <li><strong>{{message}}</strong></li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+      </div>
+      <br>
+      {% for r in restaurants %}
+      <div class="nameAndPrice">
+        <span class="name">
+          <a href="{{url_for('showMenu', restaurant_id=r.id)}}" class="restaurant_link">{{r.name}}</a>
+        </span>
+      </div>
+      <div class="editdeletepane">
+        <a href="{{url_for('editRestaurants', restaurant_id=r.id)}}">Edit Restaurant</a>
+        <br>
+        <a href="{{url_for('deleteRestaurants', restaurant_id=r.id)}}">Delete Restaurant</a>
+        <br>
+      </div>
+      <br>
+      {% endfor %}
+
+    </div>
+  </body>
+</html>
